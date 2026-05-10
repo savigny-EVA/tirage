@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tirage au Sort — EVA Savigny</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg-2: #111111;
+    --bg-3: #181818;
+    --accent: #E05A3A;
+    --accent-glow: rgba(224, 90, 58, 0.4);
+    --text: #FFFFFF;
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --text-faint: rgba(255, 255, 255, 0.3);
+    --border: rgba(255, 255, 255, 0.08);
+    --green: #4ade80;
+    --red: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow Condensed', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at top, rgba(224, 90, 58, 0.12), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(224, 90, 58, 0.06), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 36px 28px 80px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .brand { display: flex; flex-direction: column; gap: 4px; }
+
+  .brand-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .brand-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(44px, 6vw, 76px);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .brand-title .accent { color: var(--accent); }
+
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .header-right {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .header-right .big {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    color: var(--text);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr 340px;
+    gap: 24px;
+  }
+
+  @media (max-width: 1180px) {
+    .layout { grid-template-columns: 1fr 1fr; }
+    .stage-wrap { grid-column: 1 / -1; order: -1; }
+  }
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+    .stage-wrap { order: -1; }
+  }
+
+  .panel {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 22px;
+    position: relative;
+  }
+
+  .panel::before, .panel::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+  }
+  .panel::before {
+    top: -1px; left: -1px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+  .panel::after {
+    bottom: -1px; right: -1px;
+    border-bottom: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+
+  .panel-title {
+    font-weight: 900;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .panel-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .add-form { display: flex; flex-direction: column; gap: 8px; }
+  .form-row { display: grid; grid-template-columns: 70px 1fr; gap: 8px; }
+
+  input[type="text"], input[type="number"], textarea {
+    background: #000;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 13px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--text-dim); font-weight: 400; }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 13px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { background: #2a2a2a; color: var(--text-dim); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--text-dim); background: rgba(255,255,255,0.02); box-shadow: none; }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--red); box-shadow: none; }
+
+  .items-list {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .items-list::-webkit-scrollbar { width: 6px; }
+  .items-list::-webkit-scrollbar-track { background: transparent; }
+  .items-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .items-list::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+  .empty-state {
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--text-dim);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+  }
+
+  .lot-item {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .lot-item:hover:not(.exhausted) { background: rgba(255,255,255,0.05); }
+  .lot-item.selected {
+    background: rgba(224, 90, 58, 0.18);
+    border-left-width: 5px;
+    padding-left: 10px;
+  }
+  .lot-item.exhausted {
+    border-left-color: rgba(255,255,255,0.1);
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .lot-qty-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+  .lot-qty-badge .total {
+    color: var(--text-faint);
+    font-size: 12px;
+  }
+  .lot-item.exhausted .lot-qty-badge { color: var(--text-dim); text-decoration: line-through; }
+  .lot-item.selected .lot-qty-badge { color: #fff; }
+
+  .lot-name { font-weight: 700; font-size: 16px; line-height: 1.15; }
+  .lot-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .lot-item.selected .lot-meta { color: var(--accent); }
+
+  .item-delete {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .item-delete:hover { color: var(--red); }
+
+  .participant-item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .participant-item:hover { background: rgba(255,255,255,0.05); border-left-color: var(--text-faint); }
+  .participant-item.won {
+    border-left-color: var(--green);
+    background: rgba(74, 222, 128, 0.06);
+  }
+
+  .participant-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+  .participant-name { font-weight: 600; font-size: 16px; line-height: 1.2; }
+  .participant-won-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .panel-actions .btn {
+    flex: 1;
+    padding: 9px;
+    font-size: 12px;
+    min-width: 100px;
+  }
+
+  .opt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .opt-row:hover { color: var(--text); border-color: var(--text-faint); }
+  .opt-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .stage-wrap { min-width: 0; }
+
+  .stage {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stage::before, .stage::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+  }
+  .stage::before {
+    top: -1px; right: -1px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+  .stage::after {
+    bottom: -1px; left: -1px;
+    border-bottom: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+
+  .stage-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stage-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .stage-counter .num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 900;
+    margin-right: 4px;
+  }
+
+  .stage-selected-lot {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 6px 12px;
+    background: rgba(224, 90, 58, 0.15);
+    border: 1px solid var(--accent);
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stage-selected-lot.empty {
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px dashed var(--border);
+    font-weight: 600;
+  }
+
+  .stage-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    text-align: center;
+    position: relative;
+    min-height: 540px;
+  }
+
+  .stage-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .pulse-circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .pulse-circle::before, .pulse-circle::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    opacity: 0.4;
+    animation: ringExpand 2.4s ease-out infinite;
+  }
+  .pulse-circle::after { animation-delay: 1.2s; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  @keyframes ringExpand { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
+
+  .pulse-circle-inner {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 52px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .prompt-text {
+    font-weight: 900;
+    font-size: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .prompt-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-top: -16px;
+    text-align: center;
+    max-width: 480px;
+  }
+
+  .draw-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 20px 52px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  .draw-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 40px var(--accent-glow); }
+  .draw-btn:disabled { background: #2a2a2a; color: var(--text-dim); cursor: not-allowed; }
+
+  .stage-drawing {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+  }
+
+  .drawing-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    animation: blink 0.8s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .drawing-prize {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 8px 20px;
+    background: rgba(224, 90, 58, 0.15);
+    border: 1px solid var(--accent);
+  }
+
+  .reel {
+    width: 100%;
+    max-width: 760px;
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+  }
+  .reel::before, .reel::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 70px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .reel::before { top: 0; background: linear-gradient(to bottom, var(--bg-2), transparent); }
+  .reel::after { bottom: 0; background: linear-gradient(to top, var(--bg-2), transparent); }
+
+  .reel-marker {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 64px;
+    margin-top: -32px;
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(224,90,58,0.1), transparent 15%, transparent 85%, rgba(224,90,58,0.1));
+  }
+  .reel-marker::before, .reel-marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0; height: 0;
+    margin-top: -8px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+  }
+  .reel-marker::before { left: 0; border-left: 12px solid var(--accent); }
+  .reel-marker::after { right: 0; border-right: 12px solid var(--accent); }
+
+  .reel-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reel-item {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    padding: 0 16px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .stage-result {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    animation: revealResult 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  @keyframes revealResult { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .result-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  .result-winner {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(56px, 9vw, 120px);
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #fff 0%, #fff 60%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+    max-width: 100%;
+    padding: 0 16px;
+    word-break: break-word;
+  }
+
+  .result-prize-line {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: -4px;
+    text-align: center;
+    padding: 0 16px;
+  }
+  .result-prize-line .prize { color: var(--accent); font-weight: 900; }
+
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.active { display: flex; }
+
+  .modal {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 30px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 16px; height: 16px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+
+  .modal-title {
+    font-weight: 900;
+    font-size: 26px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .modal-text {
+    color: var(--text-dim);
+    font-size: 16px;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions .btn { flex: 1; }
+
+  .modal.wide { max-width: 520px; text-align: left; }
+  .modal.wide .modal-title { text-align: center; }
+  .modal.wide p { color: var(--text-dim); font-size: 14px; margin-bottom: 10px; }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 40;
+  }
+
+  .all-done {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .all-done .check { font-size: 64px; color: var(--green); }
+  .all-done h2 { font-size: 38px; font-weight: 900; text-transform: uppercase; }
+  .all-done p { color: var(--text-dim); max-width: 420px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="brand">
+      <span class="brand-label">EVA Savigny-le-Temple</span>
+      <h1 class="brand-title">Tirage<br><span class="accent">au Sort</span></h1>
+      <span class="brand-sub">// kiosk-mode · v2.0</span>
+    </div>
+    <div class="header-right">
+      <div>Session</div>
+      <div class="big" id="dateNow">—</div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- COLONNE 1 : LOTS -->
+    <aside class="panel">
+      <h2 class="panel-title">Lots</h2>
+      <div class="panel-sub">Cliquez pour sélectionner</div>
+
+      <div class="add-form">
+        <div class="form-row">
+          <input type="number" id="lotQty" placeholder="Qté" min="1" value="1">
+          <input type="text" id="lotName" placeholder="Nom du lot">
+        </div>
+        <button class="btn" id="addLotBtn">+ Ajouter ce lot</button>
+      </div>
+
+      <div class="items-list" id="lotsList"></div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="presetLotsBtn">Preset démo</button>
+        <button class="btn btn-danger" id="clearLotsBtn">Vider</button>
+      </div>
+    </aside>
+
+    <!-- COLONNE 2 : STAGE -->
+    <main class="stage-wrap">
+      <div class="stage">
+        <div class="stage-header">
+          <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
+            <span class="stage-counter"><span class="num" id="counterParticipants">0</span>participants</span>
+            <span class="stage-counter"><span class="num" id="counterRemaining">0</span>lots restants</span>
+          </div>
+          <div class="stage-selected-lot empty" id="selectedLotLabel">Aucun lot sélectionné</div>
+        </div>
+
+        <div class="stage-body">
+
+          <div class="stage-prompt" id="stagePrompt">
+            <div class="pulse-circle">
+              <div class="pulse-circle-inner">★</div>
+            </div>
+            <div>
+              <div class="prompt-text" id="promptText">Sélectionnez un lot</div>
+              <div class="prompt-sub" id="promptSub">// puis ajoutez des participants</div>
+            </div>
+            <button class="draw-btn" id="drawBtn" disabled>Lancer le tirage</button>
+          </div>
+
+          <div class="stage-drawing" id="stageDrawing">
+            <div class="drawing-label">// Tirage en cours...</div>
+            <div class="drawing-prize" id="drawingPrize">—</div>
+            <div class="reel">
+              <div class="reel-marker"></div>
+              <div class="reel-track" id="reelTrack"></div>
+            </div>
+          </div>
+
+          <div class="stage-result" id="stageResult">
+            <div class="result-label">// Le gagnant est</div>
+            <div class="result-winner" id="resultWinner">—</div>
+            <div class="result-prize-line">remporte <span class="prize" id="resultPrize">—</span></div>
+            <div class="result-actions">
+              <button class="btn" id="continueBtn">Tirage suivant</button>
+            </div>
+          </div>
+
+          <div class="all-done" id="allDone">
+            <div class="check">✓</div>
+            <h2>Tous les lots sont attribués</h2>
+            <p>Ajoutez de nouveaux lots ou réinitialisez pour relancer une session.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- COLONNE 3 : PARTICIPANTS -->
+    <aside class="panel">
+      <h2 class="panel-title">Participants</h2>
+      <div class="panel-sub">La liste des candidats</div>
+
+      <div class="add-form">
+        <input type="text" id="participantName" placeholder="Nom du participant">
+        <button class="btn" id="addParticipantBtn">+ Ajouter</button>
+      </div>
+
+      <label class="opt-row">
+        <input type="checkbox" id="excludeWinners" checked>
+        <span>Exclure les gagnants des tirages suivants</span>
+      </label>
+
+      <div class="items-list" id="participantsList"></div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="bulkBtn">Import multi-lignes</button>
+        <button class="btn btn-danger" id="clearParticipantsBtn">Vider</button>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- MODAL CONFIRM CLEAR LOTS -->
+<div class="modal-backdrop" id="clearLotsModal">
+  <div class="modal">
+    <h3 class="modal-title">Vider tous les lots ?</h3>
+    <p class="modal-text">Cette action efface tous les lots configurés.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="clearLotsCancel">Annuler</button>
+      <button class="btn btn-danger" id="clearLotsConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM CLEAR PARTICIPANTS -->
+<div class="modal-backdrop" id="clearParticipantsModal">
+  <div class="modal">
+    <h3 class="modal-title">Vider les participants ?</h3>
+    <p class="modal-text">Cette action efface toute la liste des participants.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="clearParticipantsCancel">Annuler</button>
+      <button class="btn btn-danger" id="clearParticipantsConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORT BULK -->
+<div class="modal-backdrop" id="bulkModal">
+  <div class="modal wide">
+    <h3 class="modal-title">Import de participants</h3>
+    <p>Collez une liste de noms, un par ligne :</p>
+    <textarea id="bulkText" placeholder="Jean Dupont&#10;Marie Martin&#10;Lucas Bernard&#10;..."></textarea>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn btn-ghost" id="bulkCancel">Annuler</button>
+      <button class="btn" id="bulkConfirm">Importer</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+const STORAGE_KEY = 'eva_tirage_state_v2';
+
+let state = {
+  lots: [],
+  participants: [],
+  selectedLotId: null,
+  excludeWinners: true,
+  history: []
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        state = Object.assign(state, parsed);
+        state.participants = (state.participants || []).map(p => ({
+          id: p.id, name: p.name,
+          hasWon: !!p.hasWon,
+          wonLots: Array.isArray(p.wonLots) ? p.wonLots : []
+        }));
+      }
+    }
+  } catch(e) { console.warn('load fail', e); }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e) { console.warn('save fail', e); }
+}
+
+function fmtDate() {
+  return new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function uid(p='x') { return p + '_' + Math.random().toString(36).slice(2, 9); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function remainingLotsTotal() {
+  return state.lots.reduce((s, l) => s + l.remaining, 0);
+}
+function eligibleParticipants() {
+  if (state.excludeWinners) return state.participants.filter(p => !p.hasWon);
+  return state.participants.slice();
+}
+
+// =========== LOTS ===========
+const lotsListEl = document.getElementById('lotsList');
+
+function renderLots() {
+  if (state.lots.length === 0) {
+    lotsListEl.innerHTML = '<div class="empty-state">Aucun lot configuré.<br>Ajoutez votre premier lot.</div>';
+  } else {
+    lotsListEl.innerHTML = state.lots.map(l => {
+      const exhausted = l.remaining === 0;
+      const selected = (state.selectedLotId === l.id) && !exhausted;
+      return `
+        <div class="lot-item ${exhausted ? 'exhausted' : ''} ${selected ? 'selected' : ''}" data-id="${l.id}">
+          <div class="lot-qty-badge">${l.remaining}<span class="total">/${l.total}</span></div>
+          <div>
+            <div class="lot-name">${escapeHtml(l.name)}</div>
+            <div class="lot-meta">${exhausted ? 'Épuisé' : (selected ? '✓ Sélectionné' : 'Cliquer pour choisir')}</div>
+          </div>
+          <button class="item-delete" data-action="delete-lot" data-id="${l.id}" title="Supprimer">×</button>
+        </div>
+      `;
+    }).join('');
+
+    lotsListEl.querySelectorAll('.lot-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.dataset.action === 'delete-lot') return;
+        selectLot(el.dataset.id);
+      });
+    });
+    lotsListEl.querySelectorAll('[data-action="delete-lot"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeLot(btn.dataset.id);
+      });
+    });
+  }
+
+  const sel = state.lots.find(l => l.id === state.selectedLotId);
+  if (!sel || sel.remaining === 0) state.selectedLotId = null;
+
+  document.getElementById('counterRemaining').textContent = remainingLotsTotal();
+  updateSelectedLotLabel();
+  updateStage();
+}
+
+function updateSelectedLotLabel() {
+  const label = document.getElementById('selectedLotLabel');
+  const sel = state.lots.find(l => l.id === state.selectedLotId);
+  if (sel) {
+    label.textContent = '→ ' + sel.name;
+    label.classList.remove('empty');
+  } else {
+    label.textContent = 'Aucun lot sélectionné';
+    label.classList.add('empty');
+  }
+}
+
+function selectLot(id) {
+  const lot = state.lots.find(l => l.id === id);
+  if (!lot || lot.remaining === 0) return;
+  state.selectedLotId = id;
+  saveState();
+  renderLots();
+}
+
+const lotNameInput = document.getElementById('lotName');
+const lotQtyInput = document.getElementById('lotQty');
+
+document.getElementById('addLotBtn').addEventListener('click', addLot);
+lotNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addLot(); });
+lotQtyInput.addEventListener('keydown', e => { if (e.key === 'Enter') addLot(); });
+
+function addLot() {
+  const name = lotNameInput.value.trim();
+  const qty = parseInt(lotQtyInput.value, 10);
+  if (!name) { lotNameInput.focus(); return; }
+  if (!qty || qty < 1) { lotQtyInput.focus(); return; }
+  state.lots.push({ id: uid('lot'), name, total: qty, remaining: qty });
+  saveState();
+  renderLots();
+  lotNameInput.value = '';
+  lotQtyInput.value = '1';
+  lotNameInput.focus();
+}
+
+function removeLot(id) {
+  state.lots = state.lots.filter(l => l.id !== id);
+  if (state.selectedLotId === id) state.selectedLotId = null;
+  saveState();
+  renderLots();
+}
+
+document.getElementById('presetLotsBtn').addEventListener('click', () => {
+  state.lots = [
+    { id: uid('lot'), name: 'Casquette EVA', total: 2, remaining: 2 },
+    { id: uid('lot'), name: 'T-Shirt EVA', total: 3, remaining: 3 },
+    { id: uid('lot'), name: '1 an de sessions EVA (1/jour)', total: 1, remaining: 1 }
+  ];
+  state.selectedLotId = null;
+  saveState();
+  renderLots();
+});
+
+const clearLotsModal = document.getElementById('clearLotsModal');
+document.getElementById('clearLotsBtn').addEventListener('click', () => clearLotsModal.classList.add('active'));
+document.getElementById('clearLotsCancel').addEventListener('click', () => clearLotsModal.classList.remove('active'));
+document.getElementById('clearLotsConfirm').addEventListener('click', () => {
+  state.lots = [];
+  state.selectedLotId = null;
+  saveState();
+  renderLots();
+  clearLotsModal.classList.remove('active');
+});
+
+// =========== PARTICIPANTS ===========
+const participantsListEl = document.getElementById('participantsList');
+
+function renderParticipants() {
+  if (state.participants.length === 0) {
+    participantsListEl.innerHTML = '<div class="empty-state">Aucun participant.<br>Ajoutez le premier nom.</div>';
+  } else {
+    participantsListEl.innerHTML = state.participants.map((p, i) => {
+      const wonText = (p.wonLots && p.wonLots.length > 0)
+        ? `<div class="participant-won-tag">Gagnant : ${escapeHtml(p.wonLots.join(', '))}</div>` : '';
+      return `
+        <div class="participant-item ${p.hasWon ? 'won' : ''}">
+          <div class="participant-num">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="participant-name">${escapeHtml(p.name)}</div>
+            ${wonText}
+          </div>
+          <button class="item-delete" data-id="${p.id}" title="Supprimer">×</button>
+        </div>
+      `;
+    }).join('');
+
+    participantsListEl.querySelectorAll('.item-delete').forEach(btn => {
+      btn.addEventListener('click', () => removeParticipant(btn.dataset.id));
+    });
+  }
+  document.getElementById('counterParticipants').textContent = state.participants.length;
+  updateStage();
+}
+
+const participantNameInput = document.getElementById('participantName');
+document.getElementById('addParticipantBtn').addEventListener('click', addParticipant);
+participantNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') addParticipant(); });
+
+function addParticipant() {
+  const name = participantNameInput.value.trim();
+  if (!name) { participantNameInput.focus(); return; }
+  state.participants.push({ id: uid('p'), name, hasWon: false, wonLots: [] });
+  saveState();
+  renderParticipants();
+  participantNameInput.value = '';
+  participantNameInput.focus();
+}
+
+function removeParticipant(id) {
+  state.participants = state.participants.filter(p => p.id !== id);
+  saveState();
+  renderParticipants();
+}
+
+const excludeWinnersCb = document.getElementById('excludeWinners');
+excludeWinnersCb.checked = state.excludeWinners;
+excludeWinnersCb.addEventListener('change', (e) => {
+  state.excludeWinners = e.target.checked;
+  saveState();
+  updateStage();
+});
+
+const clearParticipantsModal = document.getElementById('clearParticipantsModal');
+document.getElementById('clearParticipantsBtn').addEventListener('click', () => clearParticipantsModal.classList.add('active'));
+document.getElementById('clearParticipantsCancel').addEventListener('click', () => clearParticipantsModal.classList.remove('active'));
+document.getElementById('clearParticipantsConfirm').addEventListener('click', () => {
+  state.participants = [];
+  saveState();
+  renderParticipants();
+  clearParticipantsModal.classList.remove('active');
+});
+
+const bulkModal = document.getElementById('bulkModal');
+document.getElementById('bulkBtn').addEventListener('click', () => {
+  document.getElementById('bulkText').value = '';
+  bulkModal.classList.add('active');
+  setTimeout(() => document.getElementById('bulkText').focus(), 50);
+});
+document.getElementById('bulkCancel').addEventListener('click', () => bulkModal.classList.remove('active'));
+document.getElementById('bulkConfirm').addEventListener('click', () => {
+  const text = document.getElementById('bulkText').value;
+  const names = text.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
+  const existing = new Set(state.participants.map(p => p.name.toLowerCase()));
+  names.forEach(name => {
+    if (!existing.has(name.toLowerCase())) {
+      state.participants.push({ id: uid('p'), name, hasWon: false, wonLots: [] });
+      existing.add(name.toLowerCase());
+    }
+  });
+  saveState();
+  renderParticipants();
+  bulkModal.classList.remove('active');
+});
+
+// =========== STAGE ===========
+const stagePromptEl = document.getElementById('stagePrompt');
+const stageDrawingEl = document.getElementById('stageDrawing');
+const stageResultEl = document.getElementById('stageResult');
+const allDoneEl = document.getElementById('allDone');
+const drawBtn = document.getElementById('drawBtn');
+const promptTextEl = document.getElementById('promptText');
+const promptSubEl = document.getElementById('promptSub');
+
+function showOnly(el) {
+  [stagePromptEl, stageDrawingEl, stageResultEl, allDoneEl].forEach(e => e.style.display = 'none');
+  if (el) el.style.display = 'flex';
+}
+
+function updateStage() {
+  if (stageDrawingEl.style.display === 'flex') return;
+  if (stageResultEl.style.display === 'flex') return;
+
+  const hasLots = remainingLotsTotal() > 0;
+  const hasParticipants = eligibleParticipants().length > 0;
+  const hasSelectedLot = !!state.selectedLotId;
+
+  if (!hasLots && state.lots.length > 0) {
+    showOnly(allDoneEl);
+    return;
+  }
+
+  showOnly(stagePromptEl);
+
+  if (!hasLots) {
+    promptTextEl.textContent = 'Ajoutez un lot';
+    promptSubEl.textContent = '// puis des participants';
+    drawBtn.disabled = true;
+    drawBtn.textContent = 'Lancer le tirage';
+  } else if (!hasSelectedLot) {
+    promptTextEl.textContent = 'Sélectionnez un lot';
+    promptSubEl.textContent = '// dans la colonne de gauche';
+    drawBtn.disabled = true;
+    drawBtn.textContent = 'Sélectionner un lot';
+  } else if (!hasParticipants) {
+    promptTextEl.textContent = 'Ajoutez des participants';
+    promptSubEl.textContent = state.excludeWinners && state.participants.length > 0
+      ? '// tous les participants ont déjà gagné'
+      : '// dans la colonne de droite';
+    drawBtn.disabled = true;
+    drawBtn.textContent = 'Ajouter des participants';
+  } else {
+    const sel = state.lots.find(l => l.id === state.selectedLotId);
+    const nb = eligibleParticipants().length;
+    promptTextEl.textContent = 'Prêt pour le tirage';
+    promptSubEl.textContent = `// ${nb} participant${nb > 1 ? 's' : ''} · lot : ${sel.name}`;
+    drawBtn.disabled = false;
+    drawBtn.textContent = 'Lancer le tirage';
+  }
+}
+
+// =========== TIRAGE ===========
+const reelTrack = document.getElementById('reelTrack');
+const resultWinnerEl = document.getElementById('resultWinner');
+const resultPrizeEl = document.getElementById('resultPrize');
+const drawingPrizeEl = document.getElementById('drawingPrize');
+const continueBtn = document.getElementById('continueBtn');
+
+drawBtn.addEventListener('click', startDraw);
+continueBtn.addEventListener('click', () => {
+  // IMPORTANT: cacher explicitement le résultat AVANT updateStage()
+  // car updateStage() bypass si stageResultEl est encore visible.
+  stageResultEl.style.display = 'none';
+  stageDrawingEl.style.display = 'none';
+  reelTrack.style.transition = 'none';
+  reelTrack.style.transform = 'translateY(-50%)';
+  updateStage();
+});
+
+function startDraw() {
+  const lot = state.lots.find(l => l.id === state.selectedLotId);
+  if (!lot || lot.remaining === 0) return;
+
+  const pool = eligibleParticipants();
+  if (pool.length === 0) return;
+
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+
+  drawingPrizeEl.textContent = lot.name;
+
+  const ITEM_HEIGHT = 64;
+  const TOTAL_ITEMS = 50;
+  const WINNER_INDEX = 42;
+
+  let items = [];
+  for (let i = 0; i < TOTAL_ITEMS; i++) {
+    if (i === WINNER_INDEX) {
+      items.push(winner.name);
+    } else {
+      const r = pool[Math.floor(Math.random() * pool.length)];
+      items.push(r.name);
+    }
+  }
+
+  reelTrack.innerHTML = items.map(name =>
+    `<div class="reel-item">${escapeHtml(name)}</div>`
+  ).join('');
+
+  reelTrack.style.transition = 'none';
+  reelTrack.style.transform = 'translateY(0)';
+
+  showOnly(stageDrawingEl);
+
+  void reelTrack.offsetHeight;
+
+  const targetY = -(WINNER_INDEX * ITEM_HEIGHT);
+  reelTrack.style.transition = 'transform 5s cubic-bezier(0.15, 0.85, 0.25, 1)';
+  reelTrack.style.transform = `translateY(${targetY}px)`;
+
+  setTimeout(() => {
+    lot.remaining = Math.max(0, lot.remaining - 1);
+    const winnerObj = state.participants.find(p => p.id === winner.id);
+    if (winnerObj) {
+      winnerObj.hasWon = true;
+      winnerObj.wonLots = winnerObj.wonLots || [];
+      winnerObj.wonLots.push(lot.name);
+    }
+    state.history.push({ lotName: lot.name, participantName: winner.name, ts: Date.now() });
+
+    if (lot.remaining === 0) {
+      state.selectedLotId = null;
+    }
+
+    saveState();
+
+    resultWinnerEl.textContent = winner.name;
+    resultPrizeEl.textContent = lot.name;
+
+    showOnly(stageResultEl);
+    renderLots();
+    renderParticipants();
+    fireConfetti();
+  }, 5100);
+}
+
+// =========== CONFETTI ===========
+const confettiCanvas = document.getElementById('confetti');
+const ctx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiRaf = null;
+
+function resizeCanvas() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function fireConfetti() {
+  const colors = ['#E05A3A', '#ffffff', '#FFD700', '#FFA07A'];
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  for (let i = 0; i < 160; i++) {
+    confettiParticles.push({
+      x: cx + (Math.random() - 0.5) * 120,
+      y: cy + (Math.random() - 0.5) * 60,
+      vx: (Math.random() - 0.5) * 16,
+      vy: (Math.random() - 1) * 18 - 4,
+      g: 0.38,
+      size: 4 + Math.random() * 6,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 0,
+      maxLife: 130 + Math.random() * 60
+    });
+  }
+  if (!confettiRaf) animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles = confettiParticles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.g;
+    p.vx *= 0.99;
+    p.rot += p.vr;
+    p.life++;
+    const alpha = Math.max(0, 1 - p.life / p.maxLife);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+    ctx.restore();
+    return p.life < p.maxLife && p.y < confettiCanvas.height + 50;
+  });
+  if (confettiParticles.length > 0) {
+    confettiRaf = requestAnimationFrame(animateConfetti);
+  } else {
+    confettiRaf = null;
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  }
+}
+
+// =========== INIT ===========
+document.getElementById('dateNow').textContent = fmtDate();
+loadState();
+renderLots();
+renderParticipants();
+updateStage();
+</script>
+
+</body>
+</html>
